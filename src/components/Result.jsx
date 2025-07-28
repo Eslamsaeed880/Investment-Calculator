@@ -1,7 +1,40 @@
+import { calculateInvestmentResults, formatter } from "../util/investment"
 
-export default function UserInputs() {
+
+function calculateTotalInterest(results) {
+  for(let i = 0; i < results.length; i++) {
+    results[i].totalInterest = results[i].interest + (i > 0 ? results[i - 1].totalInterest : 0);
+    results[i].totalInvestment = results[i].annualInvestment + (i > 0 ? results[i - 1].totalInvestment : 0);
+  }
+}
+
+function calculateTotalInvestment(results, initialInvestment) {
+  results[0].totalInvestment = initialInvestment + results[0].annualInvestment;
+  for(let i = 1; i < results.length; i++) {
+    results[i].totalInvestment = results[i - 1].totalInvestment + results[i].annualInvestment;
+  }
+
+}
+
+export default function Results({ userInputs }) {
+  console.log(userInputs);
+    const results = calculateInvestmentResults(userInputs);
+    calculateTotalInterest(results);
+    calculateTotalInvestment(results, userInputs.initialInvestment);
+    const renderRows = results.map((res) => {
+      return (
+        <tr key={res.year}>
+          <td>{res.year}</td>
+          <td>{formatter.format(res.valueEndOfYear)}</td>
+          <td>{formatter.format(res.interest)}</td>
+          <td>{formatter.format(res.totalInterest)}</td>
+          <td>{formatter.format(res.totalInvestment)}</td>
+        </tr>
+      );
+    })
+
     return (
-              <table id="result">
+      <table id="result">
         <thead>
           <tr>
             <th>Year</th>
@@ -12,20 +45,7 @@ export default function UserInputs() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>$1,3232</td>
-            <td>$232</td>
-            <td>$232</td>
-            <td>$23232</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>$1,4567</td>
-            <td>$345</td>
-            <td>$577</td>
-            <td>$23456</td>
-          </tr>
+          {renderRows}
         </tbody>
       </table>
     )
